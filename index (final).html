@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PimpMyPet — Sistema Veterinário</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #FF1493;
+    --green-light: #FFE0F0;
+    --green-mid: #CC0070;
+    --green-dark: #1a0010;
+    --amber: #FF69B4;
+    --amber-light: #FFD6EC;
+    --teal: #FF1493;
+    --coral: #FF1493;
+    --coral-light: #FFE0F0;
+    --blue: #FF1493;
+    --blue-light: #FFE0F0;
+    --purple: #CC0070;
+    --purple-light: #FFD6EC;
+    --gray-50: #1a0010;
+    --gray-100: #2d0019;
+    --gray-200: #4a0028;
+    --gray-400: #FF69B4;
+    --gray-600: #FFB3D9;
+    --gray-800: #FFE0F0;
+    --white: #120009;
+    --radius: 10px;
+    --radius-lg: 16px;
+    --shadow: 0 1px 3px rgba(255,20,147,0.15), 0 1px 2px rgba(255,20,147,0.08);
+    --shadow-md: 0 4px 12px rgba(255,20,147,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #0d0008;
+    color: #FFE0F0;
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed; top: 0; left: 0; bottom: 0;
+    width: 240px;
+    background: #0a0006;
+    display: flex; flex-direction: column;
+    z-index: 100;
+    border-right: 1px solid #2d0019;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+  }
+  .sidebar-logo h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: white;
+    letter-spacing: -0.3px;
+  }
+  .sidebar-logo p {
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .nav { padding: 16px 12px; flex: 1; }
+
+  .nav-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: rgba(255,255,255,0.4);
+    padding: 0 8px;
+    margin: 16px 0 6px;
+  }
+  .nav-label:first-child { margin-top: 0; }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: rgba(255,255,255,0.7);
+    font-size: 13.5px;
+    font-weight: 400;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+  .nav-item.active { background: rgba(255,255,255,0.15); color: white; font-weight: 500; }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+  /* MAIN */
+  .main {
+    margin-left: 240px;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+  }
+
+  .topbar {
+    background: #120009;
+    border-bottom: 1px solid #2d0019;
+    padding: 0 28px;
+    height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title { font-size: 17px; font-weight: 600; color: #FFE0F0; }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover { background: var(--green-mid); }
+  .btn-outline { background: #1a0010; color: #FFE0F0; border: 1px solid #4a0028; }
+  .btn-outline:hover { background: #2d0019; }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+  .btn-danger { background: var(--coral-light); color: var(--coral); border: 1px solid rgba(216,90,48,0.2); }
+  .btn-danger:hover { background: #f5d0c4; }
+
+  .content { padding: 28px; flex: 1; }
+
+  /* VIEWS */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* STATS ROW */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card {
+    background: #120009; border-radius: var(--radius-lg);
+    border: 1px solid #2d0019;
+    padding: 18px 20px;
+  }
+  .stat-card .label { font-size: 12px; color: #FF69B4; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .stat-card .value { font-size: 28px; font-weight: 600; color: #FFE0F0; line-height: 1; }
+  .stat-card .sub { font-size: 12px; color: #FF69B4; margin-top: 4px; }
+  .stat-card.green .value { color: var(--green); }
+  .stat-card.amber .value { color: var(--amber); }
+  .stat-card.coral .value { color: var(--coral); }
+
+  /* TABLE */
+  .table-card {
+    background: #120009; border-radius: var(--radius-lg);
+    border: 1px solid #2d0019;
+    overflow: hidden;
+  }
+  .table-card-header {
+    padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid #2d0019;
+  }
+  .table-card-header h3 { font-size: 15px; font-weight: 600; color: #FFE0F0; }
+
+  .search-box {
+    display: flex; align-items: center; gap: 8px;
+    background: #1a0010; border: 1px solid #4a0028;
+    border-radius: 8px; padding: 7px 12px;
+  }
+  .search-box input {
+    border: none; background: none; font-size: 13px; outline: none;
+    font-family: 'DM Sans', sans-serif; color: #FFE0F0;
+    width: 200px;
+  }
+  .search-box input::placeholder { color: #FF69B4; }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    padding: 11px 16px;
+    text-align: left;
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: #FF69B4;
+    background: #1a0010;
+    border-bottom: 1px solid #2d0019;
+  }
+  tbody tr { border-bottom: 1px solid #2d0019; transition: background 0.1s; cursor: pointer; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #1a0010; }
+  td { padding: 13px 16px; font-size: 13.5px; color: #FFE0F0; }
+
+  .badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11.5px; font-weight: 500;
+  }
+  .badge-green { background: var(--green-light); color: var(--green-dark); }
+  .badge-amber { background: var(--amber-light); color: #633806; }
+  .badge-coral { background: var(--coral-light); color: #711307; }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .badge-purple { background: var(--purple-light); color: var(--purple); }
+  .badge-gray { background: var(--gray-100); color: var(--gray-600); }
+
+  /* AVATAR */
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; flex-shrink: 0;
+  }
+  .av-green { background: var(--green-light); color: var(--green-dark); }
+  .av-amber { background: var(--amber-light); color: #633806; }
+  .av-blue { background: var(--blue-light); color: var(--blue); }
+  .av-coral { background: var(--coral-light); color: #711307; }
+  .av-purple { background: var(--purple-light); color: var(--purple); }
+
+  .pet-name { display: flex; align-items: center; gap: 10px; font-weight: 500; }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.45);
+    align-items: flex-start; justify-content: center;
+    overflow-y: auto; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #120009; border-radius: var(--radius-lg);
+    width: 100%; max-width: 780px;
+    margin: auto;
+    box-shadow: var(--shadow-md);
+    position: relative;
+  }
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #2d0019;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h2 { font-size: 17px; font-weight: 600; color: #FFE0F0; }
+  .modal-body { padding: 24px; }
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #2d0019;
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+
+  .modal-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--gray-400); font-size: 20px; padding: 4px;
+    display: flex; align-items: center;
+  }
+  .modal-close:hover { color: var(--gray-800); }
+
+  /* FORM */
+  .form-section { margin-bottom: 24px; }
+  .form-section-title {
+    font-size: 12px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--green-mid);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--green-light);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .form-section-title svg { width: 16px; height: 16px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .form-full { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: 12px; font-weight: 500; color: #FFB3D9; }
+  .field input, .field select, .field textarea {
+    padding: 9px 12px;
+    border: 1px solid #4a0028;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-family: 'DM Sans', sans-serif;
+    color: #FFE0F0;
+    outline: none;
+    transition: border-color 0.15s;
+    background: #1a0010;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: #FF1493;
+    box-shadow: 0 0 0 3px rgba(255,20,147,0.2);
+  }
+  .field textarea { resize: vertical; min-height: 90px; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--gray-100); margin-bottom: 20px; }
+  .tab-btn {
+    padding: 10px 16px;
+    font-size: 13px; font-weight: 500;
+    border: none; background: none; cursor: pointer;
+    color: var(--gray-400);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .tab-btn:hover { color: var(--gray-800); }
+  .tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+
+  /* PHOTO UPLOAD */
+  .photo-upload {
+    border: 2px dashed #4a0028;
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: #1a0010;
+  }
+  .photo-upload:hover { border-color: #FF1493; background: #2d0019; }
+  .photo-upload svg { color: var(--gray-400); margin-bottom: 8px; }
+  .photo-upload p { font-size: 13px; color: var(--gray-400); }
+  .photo-upload strong { color: var(--green); }
+  .photo-upload input { display: none; }
+
+  .photos-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+  .photo-thumb {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--gray-100);
+    position: relative;
+    background: var(--gray-100);
+  }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-thumb .remove-btn {
+    position: absolute; top: 4px; right: 4px;
+    background: rgba(0,0,0,0.5); color: white;
+    border: none; border-radius: 50%;
+    width: 22px; height: 22px;
+    cursor: pointer; font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .photo-label {
+    font-size: 11px; color: var(--gray-600); text-align: center;
+    margin-top: 4px;
+  }
+
+  /* VACCINE LIST */
+  .vaccine-list { display: flex; flex-direction: column; gap: 8px; }
+  .vaccine-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px;
+    background: #1a0010;
+    border: 1px solid #2d0019;
+    border-radius: 8px;
+  }
+  .vaccine-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--green); cursor: pointer; }
+  .vaccine-item label { font-size: 13.5px; cursor: pointer; flex: 1; }
+  .vaccine-item .dose-field { display: flex; align-items: center; gap: 6px; }
+  .vaccine-item .dose-field input { width: 80px; padding: 5px 8px; font-size: 12px; }
+  .vaccine-item .dose-field label { font-size: 11px; color: var(--gray-400); }
+
+  /* CONSULTA DETAIL */
+  .detail-header {
+    background: var(--green-dark);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    color: white;
+    margin-bottom: 24px;
+    display: flex; align-items: center; gap: 20px;
+  }
+  .detail-header .pet-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 700;
+  }
+  .detail-header h2 { font-size: 22px; font-weight: 700; margin-bottom: 4px; font-family: 'DM Serif Display', serif; }
+  .detail-header p { font-size: 13px; opacity: 0.7; }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .detail-block {
+    background: #120009; border-radius: var(--radius-lg);
+    border: 1px solid #2d0019;
+    padding: 18px 20px;
+  }
+  .detail-block h4 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px;
+    color: var(--gray-400); font-weight: 600; margin-bottom: 12px;
+  }
+  .detail-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13.5px; }
+  .detail-row span:first-child { color: var(--gray-600); }
+  .detail-row span:last-child { font-weight: 500; }
+
+  /* EMPTY */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+  }
+  .empty-state svg { color: var(--gray-200); margin-bottom: 12px; }
+  .empty-state p { color: var(--gray-400); font-size: 14px; }
+
+  /* CHIP SELECT */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .chip {
+    padding: 6px 14px; border-radius: 20px;
+    border: 1.5px solid var(--gray-200);
+    font-size: 12.5px; cursor: pointer;
+    transition: all 0.15s;
+    background: white; color: var(--gray-600);
+  }
+  .chip:hover { border-color: var(--green); color: var(--green); }
+  .chip.selected { background: var(--green-light); border-color: var(--green); color: var(--green-dark); font-weight: 500; }
+
+  /* PRESCRICAO */
+  .rx-block {
+    background: #1a0010;
+    border: 1px solid #2d0019;
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .rx-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .rx-header span { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray-600); }
+  .rx-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+  .rx-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--green); color: white;
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .rx-fields { flex: 1; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
+
+  /* PRINT */
+  @media print {
+    .sidebar, .topbar, .modal-overlay, .btn { display: none !important; }
+    .main { margin-left: 0 !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <h1>🐾 PimpMyPet</h1>
+    <p>Sistema Veterinário</p>
+  </div>
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <button class="nav-item active" onclick="showView('dashboard')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Painel
+    </button>
+    <button class="nav-item" onclick="showView('consultas')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Consultas
+    </button>
+    <button class="nav-item" onclick="showView('nova-consulta')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+      Nova Consulta
+    </button>
+    <div class="nav-label">Cadastros</div>
+    <button class="nav-item" onclick="showView('pacientes')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>
+      Pacientes
+    </button>
+    <button class="nav-item" onclick="showView('donos')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 3a4 4 0 100 8 4 4 0 000-8z"/></svg>
+      Donos
+    </button>
+  </nav>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Painel</div>
+    <div class="topbar-actions">
+      <button class="btn btn-primary btn-sm" onclick="showView('nova-consulta')">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 4v16M4 12h16"/></svg>
+        Nova Consulta
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="stats-row">
+        <div class="stat-card green">
+          <div class="label">Pacientes</div>
+          <div class="value" id="stat-pacientes">0</div>
+          <div class="sub">cadastrados</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Consultas</div>
+          <div class="value" id="stat-consultas">0</div>
+          <div class="sub">realizadas</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="label">Este Mês</div>
+          <div class="value" id="stat-mes">0</div>
+          <div class="sub">consultas</div>
+        </div>
+        <div class="stat-card coral">
+          <div class="label">Donos</div>
+          <div class="value" id="stat-donos">0</div>
+          <div class="sub">cadastrados</div>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-card-header">
+          <h3>Consultas Recentes</h3>
+          <button class="btn btn-outline btn-sm" onclick="showView('consultas')">Ver todas</button>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Paciente</th><th>Dono</th><th>Tipo</th><th>Data</th><th>Status</th></tr>
+          </thead>
+          <tbody id="dashboard-recentes">
+            <tr><td colspan="5"><div class="empty-state"><p>Nenhuma consulta ainda.</p></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- CONSULTAS -->
+    <div class="view" id="view-consultas">
+      <div class="table-card">
+        <div class="table-card-header">
+          <h3>Histórico de Consultas</h3>
+          <div class="search-box">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="Buscar paciente, exame..." id="busca-consultas" oninput="renderConsultas()">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Paciente</th><th>Raça</th><th>Dono</th><th>Tipo de Exame</th><th>Data</th><th>Status</th><th></th></tr>
+          </thead>
+          <tbody id="lista-consultas"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NOVA CONSULTA -->
+    <div class="view" id="view-nova-consulta">
+      <div style="max-width: 820px;">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab(this,'tab-animal')">🐶 Paciente & Dono</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-exame')">🔬 Exame & Diagnóstico</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-vacinas')">💉 Vacinas</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-prescricao')">💊 Prescrição</button>
+          <button class="tab-btn" onclick="switchTab(this,'tab-fotos')">📷 Fotos Microscópio</button>
+        </div>
+
+        <!-- Tab Paciente -->
+        <div id="tab-animal" class="tab-pane">
+          <div class="form-section">
+            <div class="form-section-title">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
+              Dados do Paciente
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Nome do Animal *</label>
+                <input type="text" id="f-nome-animal" placeholder="Ex: Rex, Mel, Thor...">
+              </div>
+              <div class="field">
+                <label>Espécie</label>
+                <select id="f-especie">
+                  <option>Canino</option><option>Felino</option><option>Outro</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Raça</label>
+                <input type="text" id="f-raca" list="racas-list" placeholder="Ex: Labrador, Poodle...">
+                <datalist id="racas-list">
+                  <option value="Labrador Retriever"><option value="Golden Retriever">
+                  <option value="Poodle"><option value="Bulldog Francês">
+                  <option value="Yorkshire Terrier"><option value="Shih Tzu">
+                  <option value="Beagle"><option value="Pastor Alemão">
+                  <option value="Border Collie"><option value="Dachshund">
+                  <option value="Maltês"><option value="Pomerânia">
+                  <option value="Rottweiler"><option value="Husky Siberiano">
+                  <option value="SRD (Vira-lata)">
+                </datalist>
+              </div>
+              <div class="field">
+                <label>Sexo</label>
+                <select id="f-sexo"><option value="">— selecionar —</option><option>Macho</option><option>Fêmea</option></select>
+              </div>
+              <div class="field">
+                <label>Data de Nascimento</label>
+                <input type="date" id="f-nascimento">
+              </div>
+              <div class="field">
+                <label>Peso (kg)</label>
+                <input type="number" id="f-peso" step="0.1" placeholder="Ex: 12.5">
+              </div>
+              <div class="field">
+                <label>Pelagem / Cor</label>
+                <input type="text" id="f-pelagem" placeholder="Ex: Caramelo, preto e branco...">
+              </div>
+              <div class="field">
+                <label>Microchip / ID</label>
+                <input type="text" id="f-microchip" placeholder="Nº do microchip">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 3a4 4 0 100 8 4 4 0 000-8z"/></svg>
+              Dados do Dono
+            </div>
+            <div class="form-grid">
+              <div class="field">
+                <label>Nome Completo *</label>
+                <input type="text" id="f-dono-nome" placeholder="Nome do tutor">
+              </div>
+              <div class="field">
+                <label>CPF</label>
+                <input type="text" id="f-dono-cpf" placeholder="000.000.000-00">
+              </div>
+              <div class="field">
+                <label>Telefone / WhatsApp</label>
+                <input type="tel" id="f-dono-tel" placeholder="(27) 99999-0000">
+              </div>
+              <div class="field">
+                <label>E-mail</label>
+                <input type="email" id="f-dono-email" placeholder="email@exemplo.com">
+              </div>
+              <div class="field form-full">
+                <label>Endereço</label>
+                <input type="text" id="f-dono-end" placeholder="Rua, número, bairro, cidade">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Exame -->
+        <div id="tab-exame" class="tab-pane" style="display:none">
+          <div class="form-section">
+            <div class="form-section-title">Tipo de Consulta / Exame</div>
+            <div class="field" style="margin-bottom:16px">
+              <label>Data da Consulta</label>
+              <input type="date" id="f-data" style="max-width:220px">
+            </div>
+            <div class="chip-group" id="chip-exames">
+              <div class="chip" onclick="toggleChip(this)">Clínico Geral</div>
+              <div class="chip" onclick="toggleChip(this)">Dermatotropia</div>
+              <div class="chip" onclick="toggleChip(this)">Ortopedia</div>
+              <div class="chip" onclick="toggleChip(this)">Oftalmologia</div>
+              <div class="chip" onclick="toggleChip(this)">Cardiologia</div>
+              <div class="chip" onclick="toggleChip(this)">Neurologia</div>
+              <div class="chip" onclick="toggleChip(this)">Oncologia</div>
+              <div class="chip" onclick="toggleChip(this)">Endocrinologia</div>
+              <div class="chip" onclick="toggleChip(this)">Exame de Sangue</div>
+              <div class="chip" onclick="toggleChip(this)">Ultrassonografia</div>
+              <div class="chip" onclick="toggleChip(this)">Radiografia</div>
+              <div class="chip" onclick="toggleChip(this)">Citologia</div>
+              <div class="chip" onclick="toggleChip(this)">Raspado de Pele</div>
+              <div class="chip" onclick="toggleChip(this)">Retorno</div>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label>Outro / Complementar</label>
+              <input type="text" id="f-exame-outro" placeholder="Especifique...">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Anamnese & Queixa Principal</div>
+            <div class="field form-full">
+              <label>Queixa principal / motivo da consulta</label>
+              <textarea id="f-queixa" placeholder="Descreva os sintomas, há quanto tempo, frequência..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Exame Físico</div>
+            <div class="form-grid-3">
+              <div class="field"><label>Temperatura (°C)</label><input type="number" id="f-temp" step="0.1" placeholder="38.5"></div>
+              <div class="field"><label>FC (bpm)</label><input type="number" id="f-fc" placeholder="120"></div>
+              <div class="field"><label>FR (mpm)</label><input type="number" id="f-fr" placeholder="20"></div>
+              <div class="field"><label>TPC (seg)</label><input type="number" id="f-tpc" step="0.5" placeholder="2"></div>
+              <div class="field"><label>Mucosas</label>
+                <select id="f-mucosas"><option value="">—</option><option>Rosadas</option><option>Pálidas</option><option>Cianóticas</option><option>Ictéricas</option><option>Hiperêmicas</option></select>
+              </div>
+              <div class="field"><label>Estado Geral</label>
+                <select id="f-estado"><option value="">—</option><option>Bom</option><option>Regular</option><option>Grave</option></select>
+              </div>
+            </div>
+            <div class="field form-full" style="margin-top:14px">
+              <label>Observações do exame físico</label>
+              <textarea id="f-obs-fisico" placeholder="Linfonodos, abdome, pele, membros, neurológico..."></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Diagnóstico</div>
+            <div class="field">
+              <label>Diagnóstico / Suspeita</label>
+              <textarea id="f-diagnostico" placeholder="Diagnóstico definitivo ou diferencial..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Vacinas -->
+        <div id="tab-vacinas" class="tab-pane" style="display:none">
+          <div class="form-section">
+            <div class="form-section-title">Registro de Vacinas</div>
+            <div class="vaccine-list">
+              <div class="vaccine-item">
+                <input type="checkbox" id="vac-v10"><label for="vac-v10">V10 (Óctupla + Coronavirus + Leptospirose)</label>
+                <div class="dose-field"><label>Dose</label><input type="text" placeholder="1ª / Anual"></div>
+                <input type="date" style="max-width:140px; padding:5px 8px; border:1px solid var(--gray-200); border-radius:6px; font-size:12px">
+              </div>
+              <div class="vaccine-item">
+                <input type="checkbox" id="vac-raiva"><label for="vac-raiva">Antirrábica</label>
+                <div class="dose-field"><label>Dose</label><input type="text" placeholder="Anual"></div>
+                <input type="date" style="max-width:140px; padding:5px 8px; border:1px solid var(--gray-200); border-radius:6px; font-size:12px">
+              </div>
+              <div class="vaccine-item">
+                <input type="checkbox" id="vac-giardia"><label for="vac-giardia">Giardia</label>
+                <div class="dose-field"><label>Dose</label><input type="text" placeholder="1ª / 2ª"></div>
+                <input type="date" style="max-width:140px; padding:5px 8px; border:1px solid var(--gray-200); border-radius:6px; font-size:12px">
+              </div>
+              <div class="vaccine-item">
+                <input type="checkbox" id="vac-gripe"><label for="vac-gripe">Gripe Canina (Bordetella)</label>
+                <div class="dose-field"><label>Dose</label><input type="text" placeholder="1ª / Reforço"></div>
+                <input type="date" style="max-width:140px; padding:5px 8px; border:1px solid var(--gray-200); border-radius:6px; font-size:12px">
+              </div>
+              <div class="vaccine-item">
+                <input type="checkbox" id="vac-leish"><label for="vac-leish">Leishmaniose (Leishmania Tech)</label>
+                <div class="dose-field"><label>Dose</label><input type="text" placeholder="1ª / 2ª / 3ª"></div>
+                <input type="date" style="max-width:140px; padding:5px 8px; border:1px solid var(--gray-200); border-radius:6px; font-size:12px">
+              </div>
+              <div class="vaccine-item">
+                <input type="checkbox" id="vac-outra"><label for="vac-outra">Outra</label>
+                <div class="dose-field"><input type="text" placeholder="Nome da vacina" style="width:160px"></div>
+                <input type="date" style="max-width:140px; padding:5px 8px; border:1px solid var(--gray-200); border-radius:6px; font-size:12px">
+              </div>
+            </div>
+            <div class="field" style="margin-top:16px">
+              <label>Observações sobre vacinação</label>
+              <textarea id="f-obs-vacina" placeholder="Reações, próximas doses, recomendações..." style="min-height:70px"></textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title">Vermifugação & Antiparasitários</div>
+            <div class="form-grid">
+              <div class="field"><label>Vermífugo</label><input type="text" id="f-vermifugo" placeholder="Ex: Drontal Plus"></div>
+              <div class="field"><label>Antipulgas / Carrapatos</label><input type="text" id="f-antipulgas" placeholder="Ex: NexGard, Frontline..."></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Prescrição -->
+        <div id="tab-prescricao" class="tab-pane" style="display:none">
+          <div class="form-section">
+            <div class="form-section-title">Prescrição Médica</div>
+            <div class="rx-block">
+              <div class="rx-header">
+                <span>Medicamentos</span>
+                <button class="btn btn-outline btn-sm" onclick="addRxItem()">+ Adicionar</button>
+              </div>
+              <div id="rx-list"></div>
+            </div>
+            <div class="field" style="margin-top:16px">
+              <label>Orientações ao Tutor</label>
+              <textarea id="f-orientacoes" placeholder="Cuidados em casa, alimentação, restrições, retorno..."></textarea>
+            </div>
+            <div class="field">
+              <label>Próximo Retorno</label>
+              <input type="date" id="f-retorno" style="max-width:200px">
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Fotos -->
+        <div id="tab-fotos" class="tab-pane" style="display:none">
+          <div class="form-section">
+            <div class="form-section-title">Imagens de Microscópio & Exames</div>
+            <div class="photo-upload" onclick="document.getElementById('photo-input').click()">
+              <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 20M6 8h.01M6 2h12a2 2 0 012 2v16a2 2 0 01-2 2H6a2 2 0 01-2-2V4a2 2 0 012-2z"/></svg>
+              <p><strong>Clique para adicionar</strong> ou arraste as imagens aqui</p>
+              <p style="font-size:11px; margin-top:4px">JPG, PNG — microscópio, radiografia, ecografia, citologia</p>
+              <input type="file" id="photo-input" accept="image/*" multiple onchange="handlePhotos(event)">
+            </div>
+            <div class="photos-grid" id="photos-grid"></div>
+          </div>
+          <div class="form-section">
+            <div class="form-section-title">Legenda / Interpretação das Imagens</div>
+            <div class="field">
+              <textarea id="f-foto-obs" placeholder="Descreva os achados das imagens: aumento, estruturas observadas, diagnóstico citológico..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- SALVAR -->
+        <div style="display:flex; gap:12px; justify-content:flex-end; padding-top:20px; border-top:1px solid var(--gray-100); margin-top:8px">
+          <button class="btn btn-outline" onclick="showView('consultas')">Cancelar</button>
+          <button class="btn btn-primary" onclick="salvarConsulta()">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+            Salvar Prontuário
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PACIENTES -->
+    <div class="view" id="view-pacientes">
+      <div class="table-card">
+        <div class="table-card-header">
+          <h3>Pacientes Cadastrados</h3>
+          <div class="search-box">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="Buscar por nome, raça..." id="busca-pacientes" oninput="renderPacientes()">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Animal</th><th>Espécie / Raça</th><th>Sexo</th><th>Peso</th><th>Dono</th><th>Consultas</th></tr>
+          </thead>
+          <tbody id="lista-pacientes"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DONOS -->
+    <div class="view" id="view-donos">
+      <div class="table-card">
+        <div class="table-card-header">
+          <h3>Tutores / Donos</h3>
+          <div class="search-box">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="text" placeholder="Buscar por nome, telefone..." id="busca-donos" oninput="renderDonos()">
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>Telefone</th><th>E-mail</th><th>Pets</th><th>Última Consulta</th></tr>
+          </thead>
+          <tbody id="lista-donos"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DETALHE CONSULTA -->
+    <div class="view" id="view-detalhe">
+      <div id="detalhe-content"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAÇÃO -->
+<div class="modal-overlay" id="modal-ok">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h2>✅ Prontuário Salvo!</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px; color:var(--gray-600); line-height:1.6">O prontuário foi registrado com sucesso. Você pode consultá-lo a qualquer momento na aba <strong>Consultas</strong>.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal(); showView('consultas')">Ver Consultas</button>
+      <button class="btn btn-primary" onclick="closeModal(); limparForm()">Nova Consulta</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- STORAGE ----
+let db = {
+  consultas: JSON.parse(localStorage.getItem('vet_consultas') || '[]'),
+  fotos: JSON.parse(localStorage.getItem('vet_fotos') || '{}')
+};
+
+function saveDB() {
+  localStorage.setItem('vet_consultas', JSON.stringify(db.consultas));
+  localStorage.setItem('vet_fotos', JSON.stringify(db.fotos));
+}
+
+// Dados demo
+if (db.consultas.length === 0) {
+  db.consultas = [
+    { id: 1, animal: 'Rex', especie: 'Canino', raca: 'Labrador', sexo: 'Macho', peso: '28', pelagem: 'Caramelo', microchip: '', nascimento: '2020-03-15', dono: 'Carlos Mendes', tel: '(27) 99812-3456', email: 'carlos@email.com', cpf: '123.456.789-00', end: 'Rua das Flores, 45', data: '2025-11-12', exames: ['Clínico Geral'], queixa: 'Coceira excessiva nas orelhas e membros.', temp: '38.7', fc: '110', fr: '22', tpc: '2', mucosas: 'Rosadas', estado: 'Bom', diagnostico: 'Otite externa. Dermatite alérgica sazonal.', orientacoes: 'Banho terapêutico 1x semana. Evitar gramado.', retorno: '2025-11-26', rxItems: [{med:'Surolan', dose:'3 gotas', freq:'2x/dia', duracao:'10 dias'}], fotoObs: '', status: 'Concluída' },
+    { id: 2, animal: 'Mel', especie: 'Canino', raca: 'Golden Retriever', sexo: 'Fêmea', peso: '31', pelagem: 'Dourada', microchip: '982.000.411.234567', nascimento: '2019-07-04', dono: 'Aline Souza', tel: '(27) 98756-7890', email: 'aline@email.com', cpf: '987.654.321-00', end: 'Av. Principal, 200', data: '2025-12-01', exames: ['Dermatotropia', 'Raspado de Pele'], queixa: 'Lesões na pele, perda de pelagem no dorso.', temp: '38.5', fc: '100', fr: '20', tpc: '2', mucosas: 'Rosadas', estado: 'Regular', diagnostico: 'Sarna demodécica generalizada.', orientacoes: 'Retorno em 21 dias para reavaliação.', retorno: '2025-12-22', rxItems: [{med:'Bravecto', dose:'1 comprimido', freq:'Dose única', duracao:'90 dias'}], fotoObs: 'Demodex canis visualizado no raspado. Aumento 40x.', status: 'Concluída' },
+    { id: 3, animal: 'Thor', especie: 'Canino', raca: 'Pastor Alemão', sexo: 'Macho', peso: '38', pelagem: 'Preto e Fogo', microchip: '', nascimento: '2021-01-20', dono: 'Roberto Lima', tel: '(27) 97654-1234', email: '', cpf: '', end: '', data: '2026-01-08', exames: ['Ortopedia'], queixa: 'Claudicação membro posterior direito após queda.', temp: '38.9', fc: '115', fr: '24', tpc: '2', mucosas: 'Rosadas', estado: 'Regular', diagnostico: 'Suspeita de ruptura parcial do ligamento cruzado cranial.', orientacoes: 'Repouso absoluto. Encaminhar para ortopedista.', retorno: '2026-01-22', rxItems: [{med:'Meloxicam', dose:'0.5mg/kg', freq:'1x/dia', duracao:'5 dias'}], fotoObs: '', status: 'Concluída' }
+  ];
+  saveDB();
+}
+
+let photos = [];
+let rxCount = 0;
+
+// ---- VIEWS ----
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const titles = { dashboard:'Painel', consultas:'Consultas', 'nova-consulta':'Nova Consulta', pacientes:'Pacientes', donos:'Donos', detalhe:'Prontuário' };
+  document.getElementById('topbar-title').textContent = titles[name] || '';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const map = { dashboard:0, consultas:1, 'nova-consulta':2, pacientes:3, donos:4 };
+  const navs = document.querySelectorAll('.nav-item');
+  if (map[name] !== undefined) navs[map[name]]?.classList.add('active');
+
+  if (name === 'dashboard') updateDashboard();
+  if (name === 'consultas') renderConsultas();
+  if (name === 'pacientes') renderPacientes();
+  if (name === 'donos') renderDonos();
+  if (name === 'nova-consulta') {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('f-data').value = today;
+    if (rxCount === 0) addRxItem();
+  }
+}
+
+// ---- DASHBOARD ----
+function updateDashboard() {
+  const c = db.consultas;
+  const donos = [...new Set(c.map(x => x.dono))];
+  const pets = [...new Set(c.map(x => x.animal + x.dono))];
+  const mes = new Date().getMonth();
+  const mesC = c.filter(x => x.data && new Date(x.data).getMonth() === mes);
+  document.getElementById('stat-pacientes').textContent = pets.length;
+  document.getElementById('stat-consultas').textContent = c.length;
+  document.getElementById('stat-mes').textContent = mesC.length;
+  document.getElementById('stat-donos').textContent = donos.length;
+  const tbody = document.getElementById('dashboard-recentes');
+  const recentes = [...c].sort((a,b)=> new Date(b.data)-new Date(a.data)).slice(0,5);
+  if (!recentes.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><p>Nenhuma consulta ainda.</p></div></td></tr>'; return; }
+  tbody.innerHTML = recentes.map(c => `
+    <tr onclick="verDetalhe(${c.id})">
+      <td><div class="pet-name"><div class="avatar ${avatarColor(c.animal)}">${c.animal[0].toUpperCase()}</div>${c.animal}</div></td>
+      <td>${c.dono}</td>
+      <td>${c.exames?.join(', ') || '—'}</td>
+      <td>${formatDate(c.data)}</td>
+      <td><span class="badge badge-green">${c.status}</span></td>
+    </tr>`).join('');
+}
+
+// ---- CONSULTAS ----
+function renderConsultas() {
+  const q = (document.getElementById('busca-consultas')?.value || '').toLowerCase();
+  const filtered = db.consultas.filter(c =>
+    !q || c.animal.toLowerCase().includes(q) || c.dono.toLowerCase().includes(q) ||
+    c.exames?.join(' ').toLowerCase().includes(q) || c.raca.toLowerCase().includes(q)
+  ).sort((a,b) => new Date(b.data) - new Date(a.data));
+
+  const tbody = document.getElementById('lista-consultas');
+  if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><p>Nenhum resultado.</p></div></td></tr>'; return; }
+  tbody.innerHTML = filtered.map(c => `
+    <tr onclick="verDetalhe(${c.id})">
+      <td><div class="pet-name"><div class="avatar ${avatarColor(c.animal)}">${c.animal[0].toUpperCase()}</div>${c.animal}</div></td>
+      <td>${c.raca || '—'}</td>
+      <td>${c.dono}</td>
+      <td>${c.exames?.slice(0,2).map(e=>`<span class="badge badge-blue" style="margin-right:4px">${e}</span>`).join('')||'—'}</td>
+      <td>${formatDate(c.data)}</td>
+      <td><span class="badge badge-green">${c.status}</span></td>
+      <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();excluir(${c.id})">Excluir</button></td>
+    </tr>`).join('');
+}
+
+// ---- PACIENTES ----
+function renderPacientes() {
+  const q = (document.getElementById('busca-pacientes')?.value || '').toLowerCase();
+  const pets = {};
+  db.consultas.forEach(c => {
+    const key = c.animal + '|' + c.dono;
+    if (!pets[key]) pets[key] = { ...c, count: 0 };
+    pets[key].count++;
+  });
+  const list = Object.values(pets).filter(p =>
+    !q || p.animal.toLowerCase().includes(q) || p.raca.toLowerCase().includes(q)
+  );
+  const tbody = document.getElementById('lista-pacientes');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>Nenhum paciente.</p></div></td></tr>'; return; }
+  tbody.innerHTML = list.map(p => `
+    <tr>
+      <td><div class="pet-name"><div class="avatar ${avatarColor(p.animal)}">${p.animal[0].toUpperCase()}</div>${p.animal}</div></td>
+      <td>${p.especie || 'Canino'} / <strong>${p.raca||'—'}</strong></td>
+      <td>${p.sexo||'—'}</td>
+      <td>${p.peso ? p.peso+'kg' : '—'}</td>
+      <td>${p.dono}</td>
+      <td><span class="badge badge-gray">${p.count} consulta${p.count>1?'s':''}</span></td>
+    </tr>`).join('');
+}
+
+// ---- DONOS ----
+function renderDonos() {
+  const q = (document.getElementById('busca-donos')?.value || '').toLowerCase();
+  const donosMap = {};
+  db.consultas.forEach(c => {
+    if (!donosMap[c.dono]) donosMap[c.dono] = { nome: c.dono, tel: c.tel, email: c.email, pets: new Set(), ultima: c.data };
+    donosMap[c.dono].pets.add(c.animal);
+    if (new Date(c.data) > new Date(donosMap[c.dono].ultima)) donosMap[c.dono].ultima = c.data;
+  });
+  const list = Object.values(donosMap).filter(d =>
+    !q || d.nome.toLowerCase().includes(q) || d.tel?.toLowerCase().includes(q)
+  );
+  const tbody = document.getElementById('lista-donos');
+  if (!list.length) { tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state"><p>Nenhum tutor.</p></div></td></tr>'; return; }
+  tbody.innerHTML = list.map(d => `
+    <tr>
+      <td><div class="pet-name"><div class="avatar av-blue">${d.nome[0].toUpperCase()}</div>${d.nome}</div></td>
+      <td>${d.tel||'—'}</td>
+      <td style="color:var(--blue)">${d.email||'—'}</td>
+      <td>${[...d.pets].map(p=>`<span class="badge badge-green" style="margin-right:3px">${p}</span>`).join('')}</td>
+      <td>${formatDate(d.ultima)}</td>
+    </tr>`).join('');
+}
+
+// ---- DETALHE ----
+function verDetalhe(id) {
+  const c = db.consultas.find(x => x.id === id);
+  if (!c) return;
+  showView('detalhe');
+  const colors = ['av-green','av-blue','av-amber','av-coral','av-purple'];
+  const ci = c.animal.charCodeAt(0) % colors.length;
+  const fotos = (db.fotos[id] || []);
+  document.getElementById('detalhe-content').innerHTML = `
+    <div style="margin-bottom:16px">
+      <button class="btn btn-outline btn-sm" onclick="showView('consultas')">← Voltar</button>
+    </div>
+    <div class="detail-header">
+      <div class="pet-avatar">${c.animal[0].toUpperCase()}</div>
+      <div>
+        <h2>${c.animal}</h2>
+        <p>${c.especie||'Canino'} · ${c.raca||'—'} · ${c.sexo||'—'} · ${c.peso?c.peso+'kg':'—'}</p>
+        <p style="margin-top:6px">Tutor: <strong style="color:white">${c.dono}</strong> · ${c.tel||'—'}</p>
+      </div>
+      <div style="margin-left:auto; text-align:right">
+        <div style="font-size:13px; opacity:0.7">Consulta</div>
+        <div style="font-size:20px; font-weight:700; font-family:'DM Serif Display',serif">${formatDate(c.data)}</div>
+        <span class="badge badge-green" style="margin-top:6px">${c.status}</span>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-block">
+        <h4>Tipo de Exame</h4>
+        <div>${c.exames?.map(e=>`<span class="badge badge-blue" style="margin:2px">${e}</span>`).join('')||'—'}</div>
+        ${c.queixa?`<div style="margin-top:12px; font-size:13px; color:var(--gray-600); line-height:1.6">${c.queixa}</div>`:''}
+      </div>
+      <div class="detail-block">
+        <h4>Exame Físico</h4>
+        <div class="detail-row"><span>Temperatura</span><span>${c.temp?c.temp+'°C':'—'}</span></div>
+        <div class="detail-row"><span>FC</span><span>${c.fc?c.fc+' bpm':'—'}</span></div>
+        <div class="detail-row"><span>FR</span><span>${c.fr?c.fr+' mpm':'—'}</span></div>
+        <div class="detail-row"><span>TPC</span><span>${c.tpc?c.tpc+' seg':'—'}</span></div>
+        <div class="detail-row"><span>Mucosas</span><span>${c.mucosas||'—'}</span></div>
+        <div class="detail-row"><span>Estado Geral</span><span>${c.estado||'—'}</span></div>
+      </div>
+      <div class="detail-block form-full">
+        <h4>Diagnóstico</h4>
+        <p style="font-size:13.5px; line-height:1.6; color:var(--gray-800)">${c.diagnostico||'—'}</p>
+      </div>
+      ${c.rxItems?.length ? `
+      <div class="detail-block form-full">
+        <h4>Prescrição</h4>
+        <table style="width:100%; font-size:13px">
+          <thead><tr style="background:var(--gray-50)"><th style="padding:8px; text-align:left">Medicamento</th><th style="padding:8px">Dose</th><th style="padding:8px">Frequência</th><th style="padding:8px">Duração</th></tr></thead>
+          <tbody>${c.rxItems.map(r=>`<tr><td style="padding:8px">${r.med||'—'}</td><td style="padding:8px;text-align:center">${r.dose||'—'}</td><td style="padding:8px;text-align:center">${r.freq||'—'}</td><td style="padding:8px;text-align:center">${r.duracao||'—'}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>` : ''}
+      ${c.orientacoes ? `
+      <div class="detail-block form-full">
+        <h4>Orientações ao Tutor</h4>
+        <p style="font-size:13.5px; line-height:1.6">${c.orientacoes}</p>
+        ${c.retorno?`<p style="font-size:13px; margin-top:8px; color:var(--green-mid)"><strong>Retorno:</strong> ${formatDate(c.retorno)}</p>`:''}
+      </div>` : ''}
+      ${fotos.length ? `
+      <div class="detail-block form-full">
+        <h4>Fotos Microscópio / Exames</h4>
+        <div class="photos-grid">${fotos.map(f=>`<div class="photo-thumb"><img src="${f.data}"><div class="photo-label" style="font-size:11px;padding:2px 4px">${f.name}</div></div>`).join('')}</div>
+        ${c.fotoObs?`<p style="margin-top:12px; font-size:13px; color:var(--gray-600)">${c.fotoObs}</p>`:''}
+      </div>` : ''}
+    </div>
+    <div style="text-align:right; margin-top:20px">
+      <button class="btn btn-outline" onclick="window.print()">🖨️ Imprimir Prontuário</button>
+    </div>
+  `;
+}
+
+// ---- SALVAR ----
+function salvarConsulta() {
+  const nome = document.getElementById('f-nome-animal').value.trim();
+  const dono = document.getElementById('f-dono-nome').value.trim();
+  if (!nome || !dono) { alert('Por favor preencha o nome do animal e do tutor.'); return; }
+
+  const rxItems = [];
+  document.querySelectorAll('.rx-row').forEach(row => {
+    rxItems.push({
+      med: row.querySelector('.rx-med')?.value,
+      dose: row.querySelector('.rx-dose')?.value,
+      freq: row.querySelector('.rx-freq')?.value,
+      duracao: row.querySelector('.rx-dur')?.value
+    });
+  });
+
+  const exames = [...document.querySelectorAll('#chip-exames .chip.selected')].map(c=>c.textContent);
+  const outro = document.getElementById('f-exame-outro').value.trim();
+  if (outro) exames.push(outro);
+
+  const id = Date.now();
+  const consulta = {
+    id,
+    animal: nome,
+    especie: document.getElementById('f-especie').value,
+    raca: document.getElementById('f-raca').value,
+    sexo: document.getElementById('f-sexo').value,
+    peso: document.getElementById('f-peso').value,
+    pelagem: document.getElementById('f-pelagem').value,
+    microchip: document.getElementById('f-microchip').value,
+    nascimento: document.getElementById('f-nascimento').value,
+    dono,
+    cpf: document.getElementById('f-dono-cpf').value,
+    tel: document.getElementById('f-dono-tel').value,
+    email: document.getElementById('f-dono-email').value,
+    end: document.getElementById('f-dono-end').value,
+    data: document.getElementById('f-data').value,
+    exames,
+    queixa: document.getElementById('f-queixa').value,
+    temp: document.getElementById('f-temp').value,
+    fc: document.getElementById('f-fc').value,
+    fr: document.getElementById('f-fr').value,
+    tpc: document.getElementById('f-tpc').value,
+    mucosas: document.getElementById('f-mucosas').value,
+    estado: document.getElementById('f-estado').value,
+    obsExame: document.getElementById('f-obs-fisico').value,
+    diagnostico: document.getElementById('f-diagnostico').value,
+    orientacoes: document.getElementById('f-orientacoes').value,
+    retorno: document.getElementById('f-retorno').value,
+    rxItems,
+    fotoObs: document.getElementById('f-foto-obs').value,
+    status: 'Concluída'
+  };
+
+  if (photos.length) db.fotos[id] = photos.map(p => ({ name: p.name, data: p.data }));
+
+  db.consultas.unshift(consulta);
+  saveDB();
+  document.getElementById('modal-ok').classList.add('open');
+}
+
+function limparForm() {
+  ['f-nome-animal','f-raca','f-sexo','f-peso','f-pelagem','f-microchip','f-nascimento',
+   'f-dono-nome','f-dono-cpf','f-dono-tel','f-dono-email','f-dono-end',
+   'f-queixa','f-temp','f-fc','f-fr','f-tpc','f-mucosas','f-estado','f-obs-fisico',
+   'f-diagnostico','f-orientacoes','f-retorno','f-foto-obs','f-exame-outro','f-obs-vacina'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.querySelectorAll('#chip-exames .chip').forEach(c=>c.classList.remove('selected'));
+  photos = [];
+  document.getElementById('photos-grid').innerHTML = '';
+  document.getElementById('rx-list').innerHTML = '';
+  rxCount = 0;
+  addRxItem();
+  switchTab(document.querySelector('.tab-btn'), 'tab-animal');
+  document.getElementById('f-data').value = new Date().toISOString().split('T')[0];
+}
+
+function excluir(id) {
+  if (!confirm('Excluir este prontuário?')) return;
+  db.consultas = db.consultas.filter(c => c.id !== id);
+  delete db.fotos[id];
+  saveDB();
+  renderConsultas();
+}
+
+// ---- HELPERS ----
+function closeModal() { document.getElementById('modal-ok').classList.remove('open'); }
+
+function switchTab(btn, pane) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.style.display = 'none');
+  btn.classList.add('active');
+  document.getElementById(pane).style.display = 'block';
+}
+
+function toggleChip(el) { el.classList.toggle('selected'); }
+
+function addRxItem() {
+  rxCount++;
+  const div = document.createElement('div');
+  div.className = 'rx-item rx-row';
+  div.innerHTML = `
+    <div class="rx-num">${rxCount}</div>
+    <div class="rx-fields">
+      <div class="field"><input type="text" class="rx-med" placeholder="Medicamento"></div>
+      <div class="field"><input type="text" class="rx-dose" placeholder="Dose"></div>
+      <div class="field"><input type="text" class="rx-freq" placeholder="Frequência"></div>
+      <div class="field"><input type="text" class="rx-dur" placeholder="Duração"></div>
+    </div>`;
+  document.getElementById('rx-list').appendChild(div);
+}
+
+function handlePhotos(e) {
+  const files = [...e.target.files];
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      photos.push({ name: file.name, data: ev.target.result });
+      renderPhotos();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderPhotos() {
+  const grid = document.getElementById('photos-grid');
+  grid.innerHTML = photos.map((p,i) => `
+    <div>
+      <div class="photo-thumb">
+        <img src="${p.data}">
+        <button class="remove-btn" onclick="removePhoto(${i})">✕</button>
+      </div>
+      <div class="photo-label">${p.name.length>18?p.name.slice(0,16)+'…':p.name}</div>
+    </div>`).join('');
+}
+
+function removePhoto(i) { photos.splice(i,1); renderPhotos(); }
+
+function avatarColor(name) {
+  const cols = ['av-green','av-blue','av-amber','av-coral','av-purple'];
+  return cols[name.charCodeAt(0) % cols.length];
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+// INIT
+showView('dashboard');
+</script>
+</body>
+</html>
